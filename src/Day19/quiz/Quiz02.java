@@ -1,5 +1,8 @@
 package Day19.quiz;
 
+import Day20.day19_Refactoring.dao.CafeDAO;
+import Day20.day19_Refactoring.dto.CafeDTO;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -9,10 +12,12 @@ import java.util.Scanner;
 public class Quiz02 {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
+        CafeDAO dao = new CafeDAO();
         String url = "jdbc:mysql://localhost:3306/java";
         String id = "java";
         String pw = "java";
         Connection con = null;
+        Statement stat = null;
 
         while(true){
             System.out.println("<<카페 메뉴 관리 시스템>>");
@@ -27,24 +32,18 @@ public class Quiz02 {
             int menu = Integer.parseInt(sc.nextLine());
             switch (menu){
                 case 1:
-                    con = DriverManager.getConnection(url, id, pw);
-                    Statement stat = con.createStatement();
-
                     System.out.print("메뉴 이름 : ");
                     String name = sc.nextLine();
                     System.out.print("가격 : ");
                     int price = Integer.parseInt(sc.nextLine());
-                    String sql = "insert into cafe values (null, '"+name+"','"+price+"')";
-                    int result = stat.executeUpdate(sql);
-                    System.out.println(result);
 
-                    con.close();
+                    dao.insertMenu(new CafeDTO(0,name,price));
                     break;
                 case 2:
                     con = DriverManager.getConnection(url, id, pw);
                     stat = con.createStatement();
 
-                    sql = "select * from cafe";
+                    String sql = "select * from cafe";
                     ResultSet resultset = stat.executeQuery(sql);
 
                     System.out.println("id  name  price");
@@ -81,7 +80,7 @@ public class Quiz02 {
                     System.out.print("삭제할 데이터의 ID : ");
                     cafeID = sc.nextLine();
                     sql = "delete from cafe where id = '"+cafeID+"'";
-                    result = stat.executeUpdate(sql);
+                    int result = stat.executeUpdate(sql);
                     System.out.println(result);
 
                     con.close();
