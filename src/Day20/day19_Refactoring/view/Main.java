@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
         //main 메서드에서의 예외전가는 결국 운영체제에게 전가되는데 운영체제는 예외를 처리할 수 없기 때문에 프로그램을 종료시킨다.
         Scanner sc = new Scanner(System.in);
-        CafeDAO dao = new CafeDAO();
+        CafeDAO dao = CafeDAO.getInstance();
 
 
         while (true) {

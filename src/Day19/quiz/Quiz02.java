@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class Quiz02 {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
-        CafeDAO dao = new CafeDAO();
+        CafeDAO dao = CafeDAO.getInstance();
         String url = "jdbc:mysql://localhost:3306/java";
         String id = "java";
         String pw = "java";

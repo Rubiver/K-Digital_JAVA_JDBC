@@ -1,7 +1,9 @@
 package Day20.emergency_contact.dao;
 
+import Day20.day19_Refactoring.dao.CafeDAO;
 import Day20.day19_Refactoring.dto.CafeDTO;
 import Day20.emergency_contact.dto.ContactDTO;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.xml.transform.Result;
 import java.sql.*;
@@ -9,11 +11,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContactDAO {
-    private Connection getConnection() throws Exception{
-        String url = "jdbc:mysql://localhost:3306/java";
-        String id = "java";
-        String pw = "java";
-        return DriverManager.getConnection(url, id, pw);
+    private BasicDataSource dataSource = new BasicDataSource();
+
+    private ContactDAO() {
+        dataSource.setInitialSize(5);
+        dataSource.setUrl("jdbc:mysql://localhost:3306/java");
+        dataSource.setUsername("java");
+        dataSource.setPassword("java");
+    }
+
+    //인스턴스를 한개만 생성하도록 하는 Singleton 모델링 기법으로 아래의 코드를 작성함.
+    //Singleton
+    private static ContactDAO instance;
+    //syschronized : 단 하나의 메서드 call만 허용, 메서드 사용 시 다른 사용자는 해당 메서드를 사용하지 못하는 상태가됨.
+    //서비스가 안전해지지만 그만큼 성능저하를 불러옴.
+    public synchronized static ContactDAO getInstance(){ //인스턴스 1회 생성 후 다른 사용자가 추가 인스턴스를 생성하지 않음.
+        if(instance==null){
+            instance = new ContactDAO();
+        }
+        return instance;
+    }
+
+    private Connection getConnection() throws Exception {
+        return dataSource.getConnection();
     }
 
     public int insertContact(ContactDTO dto) throws Exception{

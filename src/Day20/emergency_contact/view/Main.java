@@ -9,8 +9,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        ContactDAO dao = new ContactDAO();
-
+        ContactDAO dao = ContactDAO.getInstance();
         while(true){
             System.out.println("<<연락처 관리 프로그램>>");
             System.out.println("1. 신규 연락처 등록");
