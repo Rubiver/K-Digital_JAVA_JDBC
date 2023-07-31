@@ -1,6 +1,8 @@
 package day21.quiz.view;
 
+import day21.quiz.dao.GuestbookDAO;
 import day21.quiz.dao.MemberDAO;
+import day21.quiz.dto.GuestbookDTO;
 import day21.quiz.dto.MemberDTO;
 
 import java.io.DataInputStream;
@@ -9,10 +11,19 @@ import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 class ServiceThread extends Thread{
+    public static Timestamp getTimestamp() throws Exception{
+        SimpleDateFormat sdf = new SimpleDateFormat("yy/MM/dd");
+        long currentTime = System.currentTimeMillis();
+        Timestamp result = new Timestamp(currentTime);
+        return result;
+    }
     public static String getSHA512(String input){
 
         String toReturn = null;
@@ -27,6 +38,7 @@ class ServiceThread extends Thread{
         return toReturn;
     }
     MemberDAO dao = MemberDAO.getInstance();
+    GuestbookDAO gdao = GuestbookDAO.getInstance();
     Socket sock;
     public ServiceThread(Socket socket){
         this.sock  = socket;
@@ -54,6 +66,49 @@ class ServiceThread extends Thread{
                         int result = dao.checkID(id, pw);
 
                         dataOutputStream.writeInt(result);
+                        if(result==2){
+                            while(true){
+                                msg = dataInputStream.readUTF();
+                                switch (msg){
+                                    case "1":
+                                        System.out.println("방명록 작성중");
+                                        String writer = dataInputStream.readUTF();
+
+                                        String contents = dataInputStream.readUTF();
+                                        dataOutputStream.writeInt(gdao.insertComment(new GuestbookDTO(0,writer,contents,getTimestamp())));
+                                        break;
+                                    case "2":
+                                        List<GuestbookDTO> gdto = new ArrayList<>();
+                                        gdto = gdao.selectAll();
+                                        dataOutputStream.writeInt(gdto.size());
+                                        dataOutputStream.flush();
+                                        for(GuestbookDTO list : gdto){
+                                            dataOutputStream.writeUTF(list.getSeq()+"\t"+list.getWriter()+"\t"+list.getMessage()+"\t"+list.getWrite_date());
+                                            dataOutputStream.flush();
+                                        }
+                                        break;
+                                    case "3":
+                                        System.out.println("방명록 삭제중");
+                                        int seq = dataInputStream.readInt();
+                                        result = gdao.deleteComment(seq);
+                                        dataOutputStream.writeInt(result);
+                                        break;
+                                    case "4":
+                                        String info;
+                                        info = dataInputStream.readUTF();
+                                        gdto = gdao.searchGuestbook(info);
+                                        dataOutputStream.writeInt(gdto.size());
+                                        dataOutputStream.flush();
+                                        for(GuestbookDTO list : gdto){
+                                            dataOutputStream.writeUTF(list.getSeq()+"\t"+list.getWriter()+"\t"+list.getMessage()+"\t"+list.getWrite_date());
+                                            dataOutputStream.flush();
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
                         System.out.println("<<로그인 종료>>");
                         break;
                     case "2":
