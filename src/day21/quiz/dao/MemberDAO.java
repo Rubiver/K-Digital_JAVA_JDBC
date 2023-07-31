@@ -86,4 +86,17 @@ public class MemberDAO {
             }
         }
     }
+    public boolean isIdExist(String checkID) throws Exception {
+        String sql = "select * from members where id = ?";
+        try(
+                Connection con = this.getConnection();
+                PreparedStatement pst = con.prepareStatement(sql);
+        ){
+            pst.setString(1, checkID);
+            try(ResultSet rs = pst.executeQuery();){
+                boolean result = rs.next();
+                return result;
+            }
+        }
+    }
 }

@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) throws Exception{
+        //10.2.15.193
         Socket client = new Socket("localhost",15000);
         DataInputStream dataInputStream = new DataInputStream(client.getInputStream());
         DataOutputStream dataOutputStream = new DataOutputStream(client.getOutputStream());
@@ -56,9 +57,16 @@ public class Client {
                     msg = id+" "+pw+" "+name;
                     dataOutputStream.writeUTF(msg);
 
-                    result = dataInputStream.readInt();
-                    if(result>0){
-                        System.out.println("회원가입 성공");
+                    boolean check = dataInputStream.readBoolean();
+                    if(check){
+                        System.out.println("중복 ID가 존재합니다.");
+                        continue;
+                    }
+                    else{
+                        result = dataInputStream.readInt();
+                        if(result>0){
+                            System.out.println("회원가입 성공");
+                        }
                     }
                     break;
                 case "3":
@@ -69,7 +77,7 @@ public class Client {
                     }
                     break;
                 default:
-                    System.out.println(dataInputStream.readUTF());
+                    System.out.println("잘못된 번호 선택함.");
                     break;
             }
         }

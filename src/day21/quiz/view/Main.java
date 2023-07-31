@@ -54,17 +54,6 @@ class ServiceThread extends Thread{
                         int result = dao.checkID(id, pw);
 
                         dataOutputStream.writeInt(result);
-//                        if(result==2){
-//                            dataOutputStream.writeUTF("로그인 성공");
-//                            dataOutputStream.flush();
-//                        }else if(result == 1){
-//                            dataOutputStream.writeUTF("로그인 실패, 비밀번호를 확인하세요");
-//                            dataOutputStream.flush();
-//                        }
-//                        else{
-//                            dataOutputStream.writeUTF("로그인 실패, 아이디를 확인하세요");
-//                            dataOutputStream.flush();
-//                        }
                         System.out.println("<<로그인 종료>>");
                         break;
                     case "2":
@@ -74,10 +63,19 @@ class ServiceThread extends Thread{
                         id = data[0];
                         pw = getSHA512(data[1]);
                         name = data[2];
-                        int qResult =  dao.insertMember(new MemberDTO(id,pw,name));
-                        dataOutputStream.writeInt(qResult);
-                        dataOutputStream.flush();
-                        System.out.println("<<회원가입 종료>>");
+
+                        boolean check =  dao.isIdExist(id);
+                        if(check){
+                            dataOutputStream.writeBoolean(check);
+                            continue;
+                        }
+                        else{
+                            int qResult =  dao.insertMember(new MemberDTO(id,pw,name));
+                            dataOutputStream.writeInt(qResult);
+                            dataOutputStream.flush();
+                            System.out.println("<<회원가입 종료>>");
+                        }
+
                         break;
                     case "3":
                         List<MemberDTO> mdto = new ArrayList<>();
@@ -90,9 +88,8 @@ class ServiceThread extends Thread{
                         }
                         break;
                     default:
-                        dataOutputStream.writeUTF("서비스 오류발생.");
+                        System.out.println("서비스 오류 발생.");
                         break;
-
                 }
             }
         }catch (Exception e){
